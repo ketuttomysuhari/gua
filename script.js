@@ -8,6 +8,15 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
     selectionIndicator: false
 });
 
+// --- MODIFIKASI BAWAH TANAH & VISUAL ---
+// 1. Matikan deteksi tabrakan agar kamera bisa masuk ke bawah tanah
+viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
+
+// 2. Aktifkan transparansi globe agar objek bawah tanah bisa terlihat dari atas permukaan
+viewer.scene.globe.translucency.enabled = true;
+viewer.scene.globe.translucency.frontFaceAlpha = 0.5; // Sesuaikan (0.0 - 1.0)
+viewer.scene.globe.undergroundColor = Cesium.Color.BLACK;
+
 viewer.scene.globe.enableLighting = false;
 
 // Fokus awal
@@ -56,6 +65,8 @@ Cesium.GeoJsonDataSource.load(geoServerUrl)
 
             const cartographic = Cesium.Cartographic.fromCartesian(finalPosition);
 
+            // Koordinat Z (height) akan mengikuti input dari tinggiManual
+            // Jika ingin di bawah tanah, pastikan tinggiManual di database bernilai negatif (misal: -10)
             finalPosition = Cesium.Cartesian3.fromRadians(
                 cartographic.longitude,
                 cartographic.latitude,
@@ -73,8 +84,8 @@ Cesium.GeoJsonDataSource.load(geoServerUrl)
 
                 entity.model = {
                     uri: modelPath,
-                    minimumPixelSize: 32,
-                    maximumScale: 200,
+                    minimumPixelSize: 64,  // Ukuran minimal agar tetap terlihat dari jauh
+                    maximumScale: 1,       // PERBAIKAN: Ubah dari 200 ke 1 agar tidak membesar saat zoom mendekat
                     heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND
                 };
 
